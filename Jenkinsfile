@@ -85,6 +85,8 @@ pipeline {
             input { message 'Deploy to production?' }
             steps {
                 sh """
+                $HOME/bin/oc version --client
+                export PATH=$HOME/bin:$PATH
                 oc set image \
                 deployment ${DEPLOYMENT_PRODUCTION} \
                 shopping-cart-production=quay.io/${QUAY_USR}/do400-deploying-environments:build-${BUILD_NUMBER} \
