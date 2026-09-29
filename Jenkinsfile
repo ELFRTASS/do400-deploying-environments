@@ -9,11 +9,12 @@ pipeline {
         RHT_OCP4_DEV_USER = 'igalrq'
         DEPLOYMENT_STAGE = 'shopping-cart-stage'
         DEPLOYMENT_PRODUCTION = 'shopping-cart-production'
+        MAVEN_OPTS = '-Xmx256m'
     }
     stages {
         stage('Tests') {
             steps {
-                sh './mvnw clean test'
+                sh './mvnw clean test -DargLine="-Xmx256m"'
             }
         }
         stage('Package') {
@@ -46,6 +47,17 @@ pipeline {
                     -Dquarkus.container-image.tag=build-${BUILD_NUMBER} \
                     -Dquarkus.container-image.push=true
                 """
+            }
+        }
+        stage('Install oc') {
+            steps {
+                sh '''
+                  mkdir -p $HOME/bin
+                  curl -sL https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz \
+                    | tar xz -C $HOME/bin oc
+                  $HOME/bin/oc version --client
+                  export PATH=$HOME/bin:$PATH
+                '''
             }
         }
         stage('Deploy - Stage') {
